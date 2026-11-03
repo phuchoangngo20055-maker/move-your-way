@@ -1,0 +1,15 @@
+/* Compact shopping actions within the existing link style. */
+.purchase-link{display:inline-flex;align-items:center;gap:9px;max-width:100%;min-height:44px;padding:8px 0;color:inherit;background:none;border:0;font-size:inherit;line-height:1.4;font-weight:800;text-decoration:underline;text-underline-offset:.22em;white-space:normal}
+.purchase-link .purchase-label{min-width:0}
+.shopping-icon{width:21px;height:21px;flex:0 0 21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.fit-result .purchase-link{display:flex;max-width:fit-content;margin-top:12px}
+.shop-inline-actions{align-items:flex-start;gap:8px}
+.header-link.purchase-link{font-size:16px;min-height:44px;text-decoration:none}
+.selection-photo .purchase-link{margin-top:12px}
+.guide-page .purchase-link{margin-block:4px}
+.purchase-link:focus-visible{outline:3px solid var(--ink);outline-offset:4px}
+.finder .purchase-link:focus-visible{outline-color:var(--ink)}
+@media(hover:hover){.purchase-link:hover{text-decoration-thickness:2px}}
+@media(max-width:1000px){.header-link.purchase-link{display:none}}
+.mobile-menu .purchase-link{font-size:20px}
+@media print{.shopping-icon{display:none}}
