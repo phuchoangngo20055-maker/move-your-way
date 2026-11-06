@@ -14,7 +14,7 @@
   root.querySelector('h3').textContent=d.title;$('#fit-advice').textContent=d.body;$('#fit-priority').textContent=priorities[priority];
   $('#fit-selection').textContent=$('[data-movement="'+selected+'"]>span').textContent+' · '+$('input[name="priority"]:checked').parentElement.textContent.trim();
   $('#shop-context').textContent='Bạn đang khám phá '+$('[data-movement="'+selected+'"]>.movement-label').textContent+'.';
-  $('#shop-selected').href=d.url;$('#shop-selected').querySelector('.purchase-label').textContent='Xem đồ '+({yoga:'Yoga & Pilates',run:'chạy bộ',gym:'tập gym'}[selected]);
+  $('#shop-selected').href=d.url;$('#shop-selected').querySelector('.purchase-label').textContent='Xem danh mục '+({yoga:'Yoga & Pilates',run:'chạy bộ',gym:'tập gym'}[selected]);
   root.classList.remove('updated');void root.offsetWidth;root.classList.add('updated');if(focus){root.focus({preventScroll:true});root.scrollIntoView({block:'start',behavior:reduced.matches?'instant':'smooth'});}
  }
  document.querySelectorAll('[data-movement]').forEach(b=>b.addEventListener('click',()=>{
@@ -37,7 +37,6 @@
  const sectionLinks=[...document.querySelectorAll('.desktop-nav a,.mobile-menu a')];
  if('IntersectionObserver' in window){const navObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;sectionLinks.forEach(a=>{if(a.hash==='#'+e.target.id)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');});}},{rootMargin:'-15% 0px -65% 0px'});['dau-trang','cach-cua-ban','nhin-gan','cam-nang','tiep-tuc'].forEach(id=>navObserver.observe(document.getElementById(id)));
  }
- if(window.gsap&&window.ScrollTrigger){gsap.matchMedia().add('(prefers-reduced-motion: no-preference)',()=>{gsap.to('.hero-art',{yPercent:4,ease:'none',scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:true}});});}
  const emailOK = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
  function error(input,output,message){input.setAttribute('aria-invalid',String(!!message));output.textContent=message;}
  $('#guide-form').addEventListener('submit',e=>{e.preventDefault();const field=$('#guide-email');const message=!field.value.trim()?'Nhập email mẫu để tiếp tục, ví dụ ban@vidu.com.':!emailOK(field.value)?'Kiểm tra lại email. Ví dụ đúng: ban@vidu.com.':'';error(field,$('#email-error'),message);if(message){field.focus();return;}$('#consent-summary').textContent=$('#guide-consent').checked?'Trong lần thử này, bạn đã chọn nhận thêm nội dung MOVE YOUR WAY. Lựa chọn không được lưu.':'Bạn chỉ chọn nhận cẩm nang, không chọn nhận thêm nội dung.';$('#guide-form').hidden=true;$('#guide-success').hidden=false;$('#guide-success').focus({preventScroll:true});field.value='';$('#guide-consent').checked=false;});

@@ -13,3 +13,11 @@
 @media(max-width:1000px){.header-link.purchase-link{display:none}}
 .mobile-menu .purchase-link{font-size:20px}
 @media print{.shopping-icon{display:none}}
+
+/* A supporting collection action, distinct from the campaign's dark primary buttons. */
+.collection-cta{min-height:56px;padding:14px 18px;gap:12px;background:var(--bg);color:var(--ink);border:2px solid var(--ink);text-decoration:none;font-size:17px;line-height:1.35;text-align:left;transition:background-color 180ms var(--ease),color 180ms var(--ease),transform 140ms var(--ease)}
+.collection-arrow{width:20px;height:20px;flex:0 0 20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform 180ms var(--ease)}
+.collection-cta:focus-visible{outline:3px solid var(--ink);outline-offset:5px;background:var(--bg)}
+@media(hover:hover){.collection-cta:hover{background:var(--ink);color:var(--bg);text-decoration:none}.collection-cta:hover .collection-arrow{transform:translate(2px,-2px)}}
+.collection-cta:active{transform:scale(.98)}
+@media(max-width:600px){.shop-inline-actions .collection-cta{width:100%;justify-content:space-between;gap:10px;padding:14px}.collection-cta .purchase-label{flex:1}}

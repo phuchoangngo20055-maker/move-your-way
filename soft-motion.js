@@ -2,13 +2,11 @@
   'use strict';
   document.documentElement.dataset.motion = 'full';
   let navigationFrame = 0;
-  let navigationTarget = null;
   const running = new Set();
 
   function stopNavigation() {
     cancelAnimationFrame(navigationFrame);
     navigationFrame = 0;
-    navigationTarget = null;
   }
   function destination(target) {
     const header = document.querySelector('.site-header');
@@ -18,7 +16,6 @@
   }
   function finishNavigation(target, hash) {
     navigationFrame = 0;
-    navigationTarget = null;
     if (location.hash !== hash) history.pushState(null, '', hash);
     const hadTabindex = target.hasAttribute('tabindex');
     if (!hadTabindex) target.setAttribute('tabindex', '-1');
@@ -34,7 +31,6 @@
       if (!target) return;
       event.preventDefault();
       stopNavigation();
-      navigationTarget = target;
       const from = scrollY;
       const to = destination(target);
       if (Math.abs(to - from) < 2) {
@@ -47,7 +43,7 @@
       function frame(now) {
         const t = Math.min(1, (now - started) / duration);
         const eased = t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
-        scrollTo({top:from + (destination(target)-from)*eased, behavior:'instant'});
+        scrollTo({top:from + (to-from)*eased, behavior:'instant'});
         if (t < 1) navigationFrame = requestAnimationFrame(frame);
         else finishNavigation(target, hash);
       }
@@ -61,30 +57,62 @@
     if (['Escape','ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' '].includes(event.key)) stopNavigation();
   });
 
-  // Content stays visible if scripts fail; entry animations run only once, on arrival.
+  // Prepare only offscreen entrances. Never fade an already visible block backwards.
   const targets = document.querySelectorAll(
-    '.section-heading,.movement-row,.finder-controls,.section-bridge,'+
+    '.section-heading,.finder-controls,.section-bridge,'+
     '.selection-photo,.selection-checks>div,.shop-inline,.guide-copy,.guide-form-wrap,'+
     '.continue-intro>h2,.continue-intro>.lead,.continue-links,.fest-visual,.fest-copy,'+
     '.community-heading,.community-art,.caption-maker,.faq-heading,.faq-copy,.footer-top,.footer-logo'
   );
   if ('IntersectionObserver' in window) {
+    const prepared = new Map();
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (!entry.isIntersecting) return;
         const el = entry.target;
         observer.unobserve(el);
+        const animation = prepared.get(el);
+        prepared.delete(el);
         el.dataset.revealState = 'shown';
-        if (!el.animate) return;
-        const photo = el.matches('.selection-photo,.fest-visual');
-        const frames = photo
-          ? [{opacity:.3,transform:'translateY(18px) scale(.985)'},{opacity:1,transform:'none'}]
-          : [{opacity:.15,transform:'translateY(22px)'},{opacity:1,transform:'none'}];
-        const animation = el.animate(frames, {duration:photo?760:640, easing:'cubic-bezier(.16,1,.3,1)'});
-        running.add(animation);
-        animation.finished.then(()=>running.delete(animation),()=>running.delete(animation));
+        animation?.play();
       });
-    }, {threshold:0, rootMargin:'0px 0px -45px 0px'});
-    targets.forEach(el => {el.dataset.revealState = 'ready';observer.observe(el);});
+    }, {threshold:0, rootMargin:'0px 0px 48px 0px'});
+    // Read layout in one pass, before creating animation effects.
+    const candidates = [...targets].map(el => ({el, top:el.getBoundingClientRect().top}));
+    candidates.forEach(({el, top}) => {
+      if (top < innerHeight || !el.animate) {
+        el.dataset.revealState = 'shown';
+        return;
+      }
+      try {
+        const photo = el.matches('.selection-photo,.fest-visual');
+        const animation = el.animate([
+          {opacity:.4,transform:'translateY('+ (photo ? 16 : 22) +'px)'},
+          {opacity:1,transform:'none'}
+        ], {duration:photo?620:580,easing:'cubic-bezier(.22,.61,.36,1)',fill:'both'});
+        animation.pause();
+        animation.currentTime = 0;
+        prepared.set(el, animation);
+        running.add(animation);
+        animation.finished.then(() => {
+          running.delete(animation);
+          animation.cancel(); // Release the compositing effect after arrival.
+        }, () => running.delete(animation));
+        el.dataset.revealState = 'ready';
+        observer.observe(el);
+      } catch {
+        el.dataset.revealState = 'shown';
+      }
+    });
+    // Keyboard focus must reveal its content immediately, even when navigation skips ahead.
+    document.addEventListener('focusin', event => {
+      for (const [el, animation] of prepared) {
+        if (!el.contains(event.target)) continue;
+        observer.unobserve(el);
+        prepared.delete(el);
+        el.dataset.revealState = 'shown';
+        animation.finish();
+      }
+    });
   }
 })();
